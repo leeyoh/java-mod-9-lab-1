@@ -1,7 +1,7 @@
-export interface Message{
+export class Message {
     sender: { 
         firstName : string;
-        isOnline:boolean;
+        isOnline?:boolean;
     };
     text: string;
     conversationId: number;
