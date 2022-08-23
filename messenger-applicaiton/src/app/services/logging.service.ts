@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class LoggingService {
   log(logMessage: string) {
-    console.log(new Date().toLocaleString + "::" + logMessage);
+    console.log(new Date()+ "::" + logMessage);
   }
   constructor() { }
 }

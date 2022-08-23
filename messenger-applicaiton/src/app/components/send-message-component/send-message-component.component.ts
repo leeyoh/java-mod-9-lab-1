@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { LoggingService } from 'src/app/services/logging.service';
+
 @Component({
   selector: 'app-send-message-component',
   templateUrl: './send-message-component.component.html',
