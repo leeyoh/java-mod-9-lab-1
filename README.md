@@ -1,99 +1,64 @@
-# Lab 2
+# Lab 3
 
 ## Instructions
 
-Using what you've learned about components and services, create a new component
-that will display the number of messages sent by the active user.
+Implement the same changes we just made for `userMessages` for our
+`senderMessages`. A few things to remember:
 
-Here are a few hints:
+1. The pattern is the same, so there shouldn't be anything you need that we
+   haven't already done together
+2. Even though we added the Event Emitter for user messages in a previous
+   section, we did not add it for sender messages, so make sure that you make
+   that change as well. Refer to the previous section to refresh your memory.
 
-1. Your new component can be positioned below the user message component at the
-   bottom of the conversation history panel
-2. It can be a simple label that shows the text "total message(s): " and then
-   the number of messages sent by the active user
-3. You already have a service that handles the sending of messages - integrate
-   with that service to get your component access to the information it's
-   looking for
-
-Here is the solution:
-
-1. In your `messaging-data.service.ts`, you already have a `addUserMessage()`
-   function - no messages get sent through your application without going
-   through this function.
-2. Furthermore, that function already emits an event after it's done handling
-   the requested message
-3. So all we need to do in our new component is subscribe to the existing event
-   and use the corresponding data to update a local variable with the active
-   number of messages
-4. We then simply use `{{ }}` notation to bind to that variable in our view
-
-Here is the code for this solution:
-
-> Note: we used the following CLI command to generate the new component:
-> `ng g c application-component/conversation-history-component/message-count-component`
-
-- Inject the `MessagingDataService` into the message count component:
+Here is the complete `messaging-data.service.ts`:
 
 ```typescript
-import { Component, OnInit } from "@angular/core";
-import { MessagingDataService } from "src/app/messaging-data.service";
-import { Message } from "src/app/message.model";
+import { Injectable, EventEmitter } from "@angular/core";
+import { LoggingService } from "./logging.service";
+import { Message } from "./message.model";
+import { HttpClient } from "@angular/common/http";
 
-@Component({
-  selector: "app-message-count-component",
-  templateUrl: "./message-count-component.component.html",
-  styleUrls: ["./message-count-component.component.css"],
-})
-export class MessageCountComponentComponent implements OnInit {
-  sentMessageCount = 0;
+@Injectable()
+export class MessagingDataService {
+  private senderMessages: Message[] = [];
+  private userMessages: Message[] = [];
 
-  constructor(private messagingSvce: MessagingDataService) {}
+  userMessagesChanged = new EventEmitter<Message[]>();
+  senderMessagesChanged = new EventEmitter<Message[]>();
 
-  ngOnInit(): void {
-    this.messagingSvce.userMessagesChanged.subscribe((messages: Message[]) => {
-      this.sentMessageCount = messages.length;
-    });
+  getSenderMessages() {
+    this.httpClient
+      .get<Message[]>("http://localhost:8080/api/get-sender-messages")
+      .subscribe((messages: Message[]) => {
+        console.log(messages);
+        this.senderMessages = messages;
+        this.senderMessagesChanged.emit(this.senderMessages);
+      });
+    return this.senderMessages.slice();
+  }
+
+  getUserMessages() {
+    this.httpClient
+      .get<Message[]>("http://localhost:8080/api/get-user-messages")
+      .subscribe((messages: Message[]) => {
+        console.log(messages);
+        this.userMessages = messages;
+        this.userMessagesChanged.emit(this.userMessages);
+      });
+    return this.userMessages.slice();
+  }
+
+  addUserMessage(newMessage: Message) {
+    this.userMessages.push(newMessage);
+    this.userMessagesChanged.emit(this.userMessages.slice());
+  }
+
+  constructor(
+    private loggingSvce: LoggingService,
+    private httpClient: HttpClient
+  ) {
+    loggingSvce.log("Messaging Data Service constructor completed");
   }
 }
 ```
-
-- Add our simple text to the view for our message count component:
-
-```html
-total message(s): {{ sentMessageCount }}
-```
-
-- Add the message count component to the conversation history component in
-   `conversation-history-comopnent.component.html`:
-
-```html
-<div class="container">
-  <div class="row">
-    <div class="col-12 p-3">Ludovic, Jessica</div>
-  </div>
-  <div class="row">
-    <div class="col-12 border p-3">
-      <app-conversation-thread-component></app-conversation-thread-component>
-    </div>
-  </div>
-</div>
-
-<div class="container">
-  <div class="row">
-    <div class="col-12 p-3">
-      <app-send-message-component></app-send-message-component>
-    </div>
-  </div>
-</div>
-
-<div class="container">
-  <div class="row">
-    <div class="col-12 p-3">
-      <app-message-count-component></app-message-count-component>
-    </div>
-  </div>
-</div>
-```
-
-- Remove the `message-count-component.component.spec.ts` file, since we won't
-   be writing unit tests for this component

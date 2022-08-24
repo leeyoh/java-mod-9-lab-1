@@ -11,6 +11,7 @@ export class SenderMessageComponentComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+ 
   }
 
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { LoggingService } from 'src/app/services/logging.service';
 
 @Component({
@@ -14,9 +14,9 @@ export class SendMessageComponentComponent implements OnInit {
 
 
   ngOnInit(): void {}
-
   // use the instance of the logging service in our event handler
   onSendMessage() {
+    
     this.loggingSvce.log("Send following message: ");
     this.loggingSvce.log(this.messageString);
   }

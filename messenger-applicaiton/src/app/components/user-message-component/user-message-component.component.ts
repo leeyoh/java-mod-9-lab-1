@@ -8,7 +8,7 @@ import { Component, Input, OnInit } from "@angular/core";
 export class UserMessageComponentComponent implements OnInit {
   @Input() message = {
     sender: { firstName: "Ludovic" },
-    text: "Message from Ludovic",
+    text: "Message from Ludofsdfvic",
     conversationId: 1,
     sequenceNumber: 0,
   };

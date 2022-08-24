@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, SimpleChange } from "@angular/core";
 import { Message } from "./../../models/message.model";
 import { MessagingDataService } from "./../../services/messaging-data.service";
 
@@ -13,12 +13,16 @@ export class ConversationThreadComponentComponent implements OnInit {
 
   constructor(private messagingSvce: MessagingDataService) {}
 
+  ngOnChanges(changes: SimpleChange){
+    console.log(this.userMessages)
+    console.log('helasjdflk;js')
+  }
+
   ngOnInit(): void {
-    this.senderMessages = this.messagingSvce.getSenderMessages();
-    this.userMessages = this.messagingSvce.getUserMessages();
-    this.messagingSvce.userMessagesChanged().subscribe((messages: Message[]) => {
-      console.log("********** messages have changed");
-      this.userMessages = messages;
-    });
+    this.messagingSvce.senderMessagesChanged.subscribe((e) => this.senderMessages = e);
+    this.messagingSvce.userMessagesChanged.subscribe((e) => this.userMessages = e);
+
+    this.messagingSvce.getSenderMessages();
+    this.messagingSvce.getUserMessages();
   }
 }

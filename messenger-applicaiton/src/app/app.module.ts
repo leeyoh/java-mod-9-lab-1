@@ -13,6 +13,7 @@ import { SenderMessageComponentComponent } from './components/sender-message-com
 import { UserMessageComponentComponent } from './components/user-message-component/user-message-component.component';
 import { ContactComponentComponent } from './components/contact-component/contact-component.component';
 
+import { HttpClientModule } from '@angular/common/http';
 import { LoggingService } from './services/logging.service';
 import { MessagingDataService } from './services/messaging-data.service';
 import { MessageCountComponentComponent } from './components/message-count-component/message-count-component.component';
@@ -32,7 +33,8 @@ import { MessageCountComponentComponent } from './components/message-count-compo
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    HttpClientModule
   ],
   providers: [LoggingService,MessagingDataService],
   bootstrap: [AppComponent]

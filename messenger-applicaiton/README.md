@@ -1,27 +1,64 @@
-# MessengerApplicaiton
+# Lab 3
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.1.2.
+## Instructions
 
-## Development server
+Implement the same changes we just made for `userMessages` for our
+`senderMessages`. A few things to remember:
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+1. The pattern is the same, so there shouldn't be anything you need that we
+   haven't already done together
+2. Even though we added the Event Emitter for user messages in a previous
+   section, we did not add it for sender messages, so make sure that you make
+   that change as well. Refer to the previous section to refresh your memory.
 
-## Code scaffolding
+Here is the complete `messaging-data.service.ts`:
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```typescript
+import { Injectable, EventEmitter } from "@angular/core";
+import { LoggingService } from "./logging.service";
+import { Message } from "./message.model";
+import { HttpClient } from "@angular/common/http";
 
-## Build
+@Injectable()
+export class MessagingDataService {
+  private senderMessages: Message[] = [];
+  private userMessages: Message[] = [];
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+  userMessagesChanged = new EventEmitter<Message[]>();
+  senderMessagesChanged = new EventEmitter<Message[]>();
 
-## Running unit tests
+  getSenderMessages() {
+    this.httpClient
+      .get<Message[]>("http://localhost:8080/api/get-sender-messages")
+      .subscribe((messages: Message[]) => {
+        console.log(messages);
+        this.senderMessages = messages;
+        this.senderMessagesChanged.emit(this.senderMessages);
+      });
+    return this.senderMessages.slice();
+  }
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+  getUserMessages() {
+    this.httpClient
+      .get<Message[]>("http://localhost:8080/api/get-user-messages")
+      .subscribe((messages: Message[]) => {
+        console.log(messages);
+        this.userMessages = messages;
+        this.userMessagesChanged.emit(this.userMessages);
+      });
+    return this.userMessages.slice();
+  }
 
-## Running end-to-end tests
+  addUserMessage(newMessage: Message) {
+    this.userMessages.push(newMessage);
+    this.userMessagesChanged.emit(this.userMessages.slice());
+  }
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+  constructor(
+    private loggingSvce: LoggingService,
+    private httpClient: HttpClient
+  ) {
+    loggingSvce.log("Messaging Data Service constructor completed");
+  }
+}
+```

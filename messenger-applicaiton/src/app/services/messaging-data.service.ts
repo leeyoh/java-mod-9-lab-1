@@ -2,52 +2,47 @@ import { Injectable, EventEmitter } from "@angular/core";
 import { LoggingService } from "./logging.service";
 import { Message } from "./../models/message.model";
 import { Observable , of} from "rxjs";
+import { HttpClient } from "@angular/common/http";
 
 @Injectable()
 export class MessagingDataService {
-  private senderMessages: Message[] = [
-    {
-      sender: { firstName: "Ludovic", isOnline: true },
-      text: "Message from Ludovic",
-      conversationId: 1,
-      sequenceNumber: 0,
-    },
-    {
-      sender: { firstName: "Jessica" },
-      text: "Message from Jessica",
-      conversationId: 1,
-      sequenceNumber: 1,
-    },
-  ];
+  private senderMessages: Message[] = [];
+  private userMessages: Message[] = [];
 
-  private userMessages: Message[] = [
-    {
-      sender: { firstName: "Aurelie" },
-      text: "1st Message from Aurelie",
-      conversationId: 1,
-      sequenceNumber: 2,
-    },
-    {
-      sender: { firstName: "Aurelie" },
-      text: "2nd Message from Aurelie",
-      conversationId: 1,
-      sequenceNumber: 3,
-    },
-  ];
+  userMessagesChanged = new EventEmitter<Message[]>();
+  senderMessagesChanged = new EventEmitter<Message[]>();
 
   getSenderMessages() {
+    this.httpClient
+      .get<Message[]>("http://localhost:8080/api/get-sender-messages")
+      .subscribe((messages: Message[]) => {
+        //console.log(messages);
+        this.senderMessages = messages;
+        this.senderMessagesChanged.emit(this.senderMessages);
+      });
     return this.senderMessages.slice();
   }
 
   getUserMessages() {
+    this.httpClient
+      .get<Message[]>("http://localhost:8080/api/get-user-messages")
+      .subscribe((messages: Message[]) => {
+        //console.log(messages);
+        this.userMessages = messages;
+        this.userMessagesChanged.emit(this.userMessages);
+      });
     return this.userMessages.slice();
   }
 
-  userMessagesChanged():Observable<Message[]>{
-    const obsvMessages = of(this.userMessages);
-    return obsvMessages;
+  addUserMessage(newMessage: Message) {
+    this.userMessages.push(newMessage);
+    this.userMessagesChanged.emit(this.userMessages.slice());
   }
-  constructor(private loggingSvce: LoggingService) {
+
+  constructor(
+    private loggingSvce: LoggingService,
+    private httpClient: HttpClient
+  ) {
     loggingSvce.log("Messaging Data Service constructor completed");
   }
 }
